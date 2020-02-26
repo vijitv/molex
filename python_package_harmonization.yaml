@@ -1,0 +1,29 @@
+---
+- hosts:  edgenodes
+
+  tasks:
+    - name :  "Lists python packages installed via pip"
+      shell:  ./python2.7 pip freeze
+      register: piplist
+      args:
+        chdir:  /opt/cloudera/parcels/Anaconda/bin
+
+    - debug:
+        msg: "{{ piplist.stdout }}"
+
+    - name :  "Lists python packages installed via conda"
+      shell:  "./python2.7 conda list"
+      register: condalist
+      args:
+        chdir:  /opt/cloudera/parcels/Anaconda/bin
+
+    - debug:
+        msg: "{{ condalist.stdout }}"
+
+    - name: Copy pip contents to a file
+      copy:
+        content: "{{ piplist.stdout }}"
+        dest: /var/tmp/{{ inventory_hostname }}_piplist.txt
+
+    - name: Copy conda contents to a file
+      copy: content="{{ condalist.stdout }}" dest=/var/tmp/{{ inventory_hostname }}_condalist.txt
